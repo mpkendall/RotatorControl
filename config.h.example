@@ -1,0 +1,19 @@
+// Config for NEST Rotator Controller PCB
+
+// Motor Settings
+#define M1P1 4
+#define M1P2 5
+#define M2P1 6
+#define M2P2 7
+
+#define ENA 9
+#define ENB 10
+
+#define POTA 11
+#define POTB 12
+
+// WiFi Settings
+#define SSID "your-ssid-here"
+#define PASS "your-password-here"
+
+#define POSITION_THRESHOLD 5
