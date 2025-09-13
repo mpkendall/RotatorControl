@@ -41,6 +41,6 @@ void MotorControl::setDirection(Direction direction) {
     }
 }
 
-int MotorControl::getBearing() {
-    return analogRead(_potPin);
+int MotorControl::getBearing(int max) {
+    return map(analogRead(_potPin), 135, 3850, 0, max);
 }

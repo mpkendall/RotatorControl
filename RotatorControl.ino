@@ -7,8 +7,8 @@
 
 WebServer server(80);
 
-MotorControl azimuthMotor(M1P1, M1P2, ENA, POTA);
-MotorControl elevationMotor(M2P1, M2P2, ENB, POTB);
+MotorControl azimuthMotor(M2P1, M2P2, ENA, ELPOT);
+MotorControl elevationMotor(M1P1, M1P2, ENB, AZPOT);
 
 Direction motorDirection;
 
@@ -38,15 +38,11 @@ void loop() {
   server.handleClient();
   if (targetAzimuth != -1 && targetElevation != -1) {
     Bearing current = getCurrentBearing();
-    if (azimuthMotor.getDirection() != stop) {
-      if (abs(current.azimuth - targetAzimuth) <= POSITION_THRESHOLD) {
-        azimuthMotor.setDirection(stop);
-      }
+    if (abs(current.azimuth - targetAzimuth) <= POSITION_THRESHOLD) {
+      azimuthMotor.setDirection(stop);
     }
-    if (elevationMotor.getDirection() != stop) {
-      if (abs(current.elevation - targetElevation) <= POSITION_THRESHOLD) {
-        elevationMotor.setDirection(stop);
-      }
+    if (abs(current.elevation - targetElevation) <= POSITION_THRESHOLD) {
+      elevationMotor.setDirection(stop);
     }
   }
 }
@@ -78,8 +74,8 @@ void handleCommand() {
     server.send(400, "text/plain", "Invalid azimuth or elevation value");
     return;
   }
-  if (azVal < 0 || azVal > 360 || elVal < 0 || elVal > 90) {
-    server.send(400, "text/plain", "Azimuth must be 0-360, Elevation must be 0-90");
+  if (azVal < 0 || azVal > 360 || elVal < 0 || elVal > 180) {
+    server.send(400, "text/plain", "Azimuth must be 0-360, Elevation must be 0-180");
     return;
   }
 
@@ -92,8 +88,8 @@ void handleCommand() {
 
 Bearing getCurrentBearing() {
   Bearing b;
-  b.azimuth = azimuthMotor.getBearing();
-  b.elevation = elevationMotor.getBearing();
+  b.azimuth = azimuthMotor.getBearing(360);
+  b.elevation = elevationMotor.getBearing(180);
   return b;
 }
 

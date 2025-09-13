@@ -22,7 +22,7 @@ public:
     void backward();
     void stop();
     void setDirection(Direction direction);
-    int getBearing();
+    int getBearing(int max);
 
 private:
     int _pin1, _pin2, _enablePin, _potPin;
