@@ -4,11 +4,12 @@
 #include <WebServer.h>
 #include "config.h"
 #include "motor.h"
+#include "esp_adc_cal.h"
 
 WebServer server(80);
 
-MotorControl azimuthMotor(M2P1, M2P2, ENA, ELPOT);
-MotorControl elevationMotor(M1P1, M1P2, ENB, AZPOT);
+MotorControl azimuthMotor(M1P1, M1P2, ENA, AZPOT, POT_AZ_MIN, POT_AZ_MAX, POT_AZ_LIMIT_MIN, POT_AZ_LIMIT_MAX);
+MotorControl elevationMotor(M2P1, M2P2, ENB, ELPOT, POT_EL_MIN, POT_EL_MAX, POT_EL_LIMIT_MIN, POT_EL_LIMIT_MAX);
 
 Direction motorDirection;
 
@@ -74,8 +75,8 @@ void handleCommand() {
     server.send(400, "text/plain", "Invalid azimuth or elevation value");
     return;
   }
-  if (azVal < 0 || azVal > 360 || elVal < 0 || elVal > 180) {
-    server.send(400, "text/plain", "Azimuth must be 0-360, Elevation must be 0-180");
+  if (azVal < POT_AZ_LIMIT_MIN || azVal > POT_AZ_LIMIT_MAX || elVal < POT_EL_LIMIT_MIN || elVal > POT_EL_LIMIT_MAX) {
+    server.send(400, "text/plain", "Coordinates out of range");
     return;
   }
 
@@ -88,24 +89,26 @@ void handleCommand() {
 
 Bearing getCurrentBearing() {
   Bearing b;
-  b.azimuth = azimuthMotor.getBearing(360);
-  b.elevation = elevationMotor.getBearing(180);
+  b.azimuth = azimuthMotor.getBearing();
+  b.elevation = elevationMotor.getBearing();
   return b;
 }
 
-void setMotorCoords(int az, int el) {
+void setMotorCoords(int targetAz, int targetEl) {
+  targetAz += AZ_OFFSET;
+  targetEl += EL_OFFSET;
   Bearing currentBearing = getCurrentBearing();
-  if(az > currentBearing.azimuth) {
+  if(targetAz > currentBearing.azimuth) {
     azimuthMotor.setDirection(forward);
-  } else if (az < currentBearing.azimuth) {
+  } else if (targetAz < currentBearing.azimuth) {
     azimuthMotor.setDirection(backward);
   } else {
     azimuthMotor.setDirection(stop);
   }
 
-  if(el > currentBearing.elevation) {
+  if(targetEl > currentBearing.elevation) {
     elevationMotor.setDirection(forward);
-  } else if (el < currentBearing.elevation) {
+  } else if (targetEl < currentBearing.elevation) {
     elevationMotor.setDirection(backward);
   } else {
     elevationMotor.setDirection(stop);

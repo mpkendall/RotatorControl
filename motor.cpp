@@ -1,7 +1,7 @@
 #include "motor.h"
 
-MotorControl::MotorControl(int pin1, int pin2, int enablePin, int potPin)
-    : _pin1(pin1), _pin2(pin2), _enablePin(enablePin), _potPin(potPin) {}
+MotorControl::MotorControl(int pin1, int pin2, int enablePin, int potPin, int minRaw, int maxRaw, int minDegree, int maxDegree)
+    : _pin1(pin1), _pin2(pin2), _enablePin(enablePin), _potPin(potPin), _minRaw(minRaw), _maxRaw(maxRaw), _minDegree(minDegree), _maxDegree(maxDegree) {}
 
 void MotorControl::begin() {
     pinMode(_pin1, OUTPUT);
@@ -41,6 +41,6 @@ void MotorControl::setDirection(Direction direction) {
     }
 }
 
-int MotorControl::getBearing(int max) {
-    return map(analogRead(_potPin), 135, 3850, 0, max);
+int MotorControl::getBearing() {
+    return map(ADC_LUT[analogRead(_potPin)], _minRaw, _maxRaw, _minDegree, _maxDegree);
 }
